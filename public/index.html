@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dream Home Real Estate</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        /* Basic styles for tabs */
+        .tab-container {
+            display: flex;
+            border-bottom: 2px solid #ccc;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-bottom: none;
+            background-color: #f4f4f4;
+            margin-right: 5px;
+        }
+        .tab.active {
+            background-color: #ddd;
+            font-weight: bold;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ccc;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Tab Navigation -->
+    <div class="tab-container">
+        <div class="tab active" onclick="openTab('staff')">Staff Main Menu</div>
+        <div class="tab" onclick="openTab('branch')">Branch Main Menu</div>
+        <div class="tab" onclick="openTab('client')">Client Main Menu</div>
+    </div>
+
+    <!-- Tab Contents -->
+    <div id="staff" class="tab-content active">
+        <h1>Staff Hiring Form</h1>
+        <form id="staffForm">
+            <label for="staffno">Staff No:</label>
+            <input type="text" id="staffno" required><br>
+
+            <label for="firstName">First Name:</label>
+            <input type="text" id="firstName" required><br>
+
+            <label for="lastName">Last Name:</label>
+            <input type="text" id="lastName" required><br>
+
+            <label for="position">Position:</label>
+            <input type="text" id="position" required><br>
+
+            <label for="sex">Sex:</label>
+            <select id="sex" required>
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+            </select><br>
+
+            <label for="branchNo">Branch No:</label>
+            <input type="text" id="branchNo" required><br>
+
+            <label for="dob">Date of Birth:</label>
+            <input type="date" id="dob" required><br>
+
+            <label for="salary">Salary:</label>
+            <input type="number" id="salary" required><br>
+
+            <label for="telephone">Telephone:</label>
+            <input type="text" id="telephone" required><br>
+
+            <label for="mobile">Mobile:</label>
+            <input type="text" id="mobile" required><br>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" required><br>
+
+            <button type="submit">Hire</button>
+        </form>
+    </div>
+
+    <div id="branch" class="tab-content">
+        <h1>Branch Main Menu</h1>
+        <p>Branch-related content will go here.</p>
+    </div>
+
+    <div id="client" class="tab-content">
+        <h1>Client Main Menu</h1>
+        <p>Client-related content will go here.</p>
+    </div>
+
+    <script>
+        // Function to switch between tabs
+        function openTab(tabName) {
+            // Hide all tab contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            // Remove 'active' class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Show the selected tab content and set the tab as active
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+    </script>
+    <script src="/js/scripts.js"></script>
+</body>
+</html>
