@@ -1,7 +1,16 @@
 const express = require('express');
+const path = require('path');
 const router = express.Router();
 const { initialize, close, executeQuery } = require('./database');
 
+// Root route to serve index.html or a simple response
+router.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html')); // Adjust path if needed
+  // Alternatively, use:
+  // res.send('Welcome to the Staff Management System!');
+});
+
+// Route to hire a staff member
 router.post('/api/hire-staff', async (req, res) => {
   const { staffno, firstName, lastName, position, sex, branchNo, dob, salary, telephone, mobile, email } = req.body;
 
