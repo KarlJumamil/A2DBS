@@ -1,3 +1,5 @@
+const { SODA_COLL_MAP_MODE } = require("oracledb");
+
 document.getElementById('staffForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 

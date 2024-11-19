@@ -2,9 +2,9 @@ const oracledb = require('oracledb');
 require('dotenv').config();
 
 const dbConfig = {
-  user: 'dbs501_243v1a06',
-  password: '17381709',
-  connectString: '(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=myoracle12c.senecacollege.ca)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=oracle12c)))'
+  user: process.env.DB_USER, // From .env file
+  password: process.env.DB_PASSWORD, // From .env file
+  connectString: process.env.DB_CONNECT_STRING // From .env file
 };
 
 async function initialize() {

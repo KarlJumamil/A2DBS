@@ -1,18 +1,21 @@
 const express = require('express');
 const path = require('path');
 const router = express.Router();
-const { initialize, close, executeQuery } = require('./database');
+const { executeQuery } = require('./database');
 
-// Root route to serve index.html or a simple response
+// Serve index.html
 router.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html')); // Adjust path if needed
-  // Alternatively, use:
-  // res.send('Welcome to the Staff Management System!');
+  res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
-// Route to hire a staff member
+// Handle staff hiring
 router.post('/api/hire-staff', async (req, res) => {
   const { staffno, firstName, lastName, position, sex, branchNo, dob, salary, telephone, mobile, email } = req.body;
+
+  // Validate required fields
+  if (!staffno || !firstName || !lastName || !position || !sex || !branchNo || !dob || !salary || !telephone || !email) {
+    return res.status(400).send('All fields are required.');
+  }
 
   const query = `
     INSERT INTO DH_STAFF (STAFFNO, FNAME, LNAME, POSITION, SEX, BRANCHNO, DOB, SALARY, TELEPHONE, MOBILE, EMAIL)
@@ -21,10 +24,14 @@ router.post('/api/hire-staff', async (req, res) => {
 
   try {
     await executeQuery(query, { staffno, firstName, lastName, position, sex, branchNo, dob, salary, telephone, mobile, email });
-    res.send('Staff member hired successfully!');
+    res.status(200).send('Staff member hired successfully!');
   } catch (err) {
     console.error('Error inserting staff:', err);
-    res.status(500).send('Error hiring staff');
+    if (err.code === 'ORA-02291') {
+      res.status(400).send('Invalid Branch No. It must exist in the Branch table.');
+    } else {
+      res.status(500).send('An error occurred while hiring staff.');
+    }
   }
 });
 
