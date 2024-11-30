@@ -20,6 +20,9 @@ app.use((req, res, next) => {
 
 app.use(routes);
 
+app.use(express.json()); 
+
+
 async function startServer() {
   try {
     await initialize();

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dream Home Real Estate</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+<!-- Tab Navigation -->
+<div class="tab-container">
+    <div class="tab active" onclick="openTab('staff')">Staff Main Menu</div>
+    <a href="branch.html" class="tab">Branch Main Menu</a>
+    <a href="client.html" class="tab">Client Main Menu</a>
+</div>
+
+
+    <!-- Staff Tab Content -->
+    <div id="staff" class="tab-content active">
+        <h1>Staff Hiring Form</h1>
+        <form id="staffForm" action="/api/hire-staff" method="POST">
+            <label for="staffno">Staff No:</label>
+            <input type="text" id="staffno" name="staffno" required><br>
+
+            <label for="firstName">First Name:</label>
+            <input type="text" id="firstName" name="firstName" required><br>
+
+            <label for="lastName">Last Name:</label>
+            <input type="text" id="lastName" name="lastName" required><br>
+
+            <label for="position">Position:</label>
+            <input type="text" id="position" name="position" required><br>
+
+            <label for="sex">Sex:</label>
+            <select id="sex" name="sex" required>
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+            </select><br>
+
+            <label for="branchNo">Branch No:</label>
+            <input type="text" id="branchNo" name="branchNo" required><br>
+
+            <label for="dob">Date of Birth:</label>
+            <input type="date" id="dob" name="dob" required><br>
+
+            <label for="salary">Salary:</label>
+            <input type="number" id="salary" name="salary" required><br>
+
+            <label for="telephone">Telephone:</label>
+            <input type="text" id="telephone" name="telephone" required><br>
+
+            <label for="mobile">Mobile:</label>
+            <input type="text" id="mobile" name="mobile" required><br>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required><br>
+
+            <button type="submit">Hire</button>
+        </form>
+
+        <hr>
+
+        <h1>Staff List and Update</h1>
+        <button onclick="fetchStaff()">Refresh Staff List</button>
+        <table border="1" id="staffTable">
+            <thead>
+                <tr>
+                    <th>Staff No</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Position</th>
+                    <th>Sex</th>
+                    <th>Branch No</th>
+                    <th>DOB</th>
+                    <th>Salary</th>
+                    <th>Telephone</th>
+                    <th>Mobile</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Staff records will be dynamically added here -->
+            </tbody>
+        </table>
+
+        <div id="updateForm" class="hidden">
+            <h2>Update Staff Details</h2>
+            <form id="staffUpdateForm">
+                <input type="hidden" id="updateStaffNo">
+                <label for="updateSalary">Salary:</label>
+                <input type="number" id="updateSalary"><br>
+
+                <label for="updateTelephone">Telephone:</label>
+                <input type="text" id="updateTelephone"><br>
+
+                <label for="updateEmail">Email:</label>
+                <input type="email" id="updateEmail"><br>
+
+                <button type="button" onclick="updateStaff()">Update</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Branch Tab Content -->
+    <div id="branch" class="tab-content">
+        <h1>Branch Main Menu</h1>
+        <p>Branch-related content will go here.</p>
+    </div>
+
+    <!-- Client Tab Content -->
+    <div id="client" class="tab-content">
+        <h1>Client Main Menu</h1>
+        <p>Client-related content will go here.</p>
+    </div>
+
+    <script>
+        // Function to switch between tabs
+        function openTab(tabName) {
+            // Hide all tab contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            // Remove 'active' class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Show the selected tab content and set the tab as active
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Fetch all staff records and populate the table
+        async function fetchStaff() {
+            const response = await fetch('/api/staff');
+            const staffTableBody = document.querySelector('#staffTable tbody');
+            staffTableBody.innerHTML = ''; // Clear existing rows
+
+            if (response.ok) {
+                const staffList = await response.json();
+                staffList.forEach(staff => {
+                    const row = `
+                        <tr>
+                            <td>${staff.staffno || ''}</td>
+                            <td>${staff.fname || ''}</td>
+                            <td>${staff.lname || ''}</td>
+                            <td>${staff.position || ''}</td>
+                            <td>${staff.sex || ''}</td>
+                            <td>${staff.branchno || ''}</td>
+                            <td>${staff.dob || ''}</td>
+                            <td>${staff.salary || ''}</td>
+                            <td>${staff.telephone || ''}</td>
+                            <td>${staff.mobile || ''}</td>
+                            <td>${staff.email || ''}</td>
+                            <td><button onclick="showUpdateForm('${staff.staffno}', ${staff.salary}, '${staff.telephone}', '${staff.email}')">Edit</button></td>
+                        </tr>
+                    `;
+                    staffTableBody.innerHTML += row;
+                });
+            } else {
+                alert('Failed to fetch staff records.');
+            }
+        }
+
+        // Show update form pre-filled with staff data
+        function showUpdateForm(staffNo, salary, telephone, email) {
+            document.getElementById('updateForm').classList.remove('hidden');
+            document.getElementById('updateStaffNo').value = staffNo;
+            document.getElementById('updateSalary').value = salary;
+            document.getElementById('updateTelephone').value = telephone;
+            document.getElementById('updateEmail').value = email;
+        }
+
+        // Update staff details
+        async function updateStaff() {
+            const staffNo = document.getElementById('updateStaffNo').value;
+            const salary = document.getElementById('updateSalary').value;
+            const telephone = document.getElementById('updateTelephone').value;
+            const email = document.getElementById('updateEmail').value;
+
+            const response = await fetch(`/api/staff/${staffNo}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ salary, telephone, email })
+            });
+
+            if (response.ok) {
+                alert('Staff updated successfully!');
+                fetchStaff(); // Refresh the staff list
+                document.getElementById('updateForm').classList.add('hidden');
+            } else {
+                alert('Failed to update staff.');
+            }
+        }
+    </script>
+</body>
+</html>

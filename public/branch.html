@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Branch Main Menu - Dream Home Real Estate</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+    <!-- Tab Navigation -->
+    <div class="tab-container">
+        <a href="staff.html" class="tab">Staff Main Menu</a>
+        <a href="branch.html" class="tab active">Branch Main Menu</a>
+        <a href="client.html" class="tab">Client Main Menu</a>
+    </div>
+
+    <!-- Branch Address Section -->
+    <h2>Identify Branch Address</h2>
+    <form id="branchAddressForm">
+        <label for="branchno">Enter Branch No:</label>
+        <input type="text" id="branchno" name="branchno" placeholder="e.g., B002" required>
+        <button type="button" onclick="fetchBranchAddress()">Get Address</button>
+    </form>
+    <p id="branchAddress"></p>
+
+    <!-- Branch Update Section -->
+    <h2>Edit Branch Details</h2>
+    <table border="1" id="branchTable">
+        <thead>
+            <tr>
+                <th>Branch No</th>
+                <th>Street</th>
+                <th>City</th>
+                <th>Postcode</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Branch records will be dynamically populated here -->
+        </tbody>
+    </table>
+
+    <div id="branchEditForm" class="hidden">
+        <h3>Update Branch Address</h3>
+        <form>
+            <input type="hidden" id="editBranchNo">
+            <label for="editStreet">Street:</label>
+            <input type="text" id="editStreet"><br>
+            <label for="editCity">City:</label>
+            <input type="text" id="editCity"><br>
+            <label for="editPostcode">Postcode:</label>
+            <input type="text" id="editPostcode"><br>
+            <button type="button" onclick="updateBranchAddress()">Update</button>
+        </form>
+    </div>
+
+
+
+    <h2>Open a New Branch</h2>
+    <form id="openBranchForm">
+        <label for="p_branchno">Branch No:</label>
+        <input type="text" id="p_branchno" name="p_branchno" required><br>
+        <label for="p_street">Street:</label>
+        <input type="text" id="p_street" name="p_street" required><br>
+        <label for="p_city">City:</label>
+        <input type="text" id="p_city" name="p_city" required><br>
+        <label for="p_postcode">Postcode:</label>
+        <input type="text" id="p_postcode" name="p_postcode" required><br>
+        <button type="button" onclick="openBranch()">Open Branch</button>
+    </form>
+    <p id="openBranchMessage"></p>
+    
+    
+    
+    
+    <script>
+
+
+// Fetch branch address
+async function fetchBranchAddress() {
+  const branchno = document.getElementById('branchno').value.trim();
+  if (!branchno) {
+    document.getElementById('branchAddress').textContent = 'Branch No cannot be empty.';
+    return;
+  }
+  try {
+    console.log(`Fetching address for branch: ${branchno}`); // Debugging: Log branch number
+    const response = await fetch(`/api/branch/address/${branchno}`);
+    console.log('Response status:', response.status); // Debugging: Log response status
+
+    if (response.ok) {
+      const address = await response.text(); // Retrieve plain text response
+      console.log('Fetched address:', address); // Debugging: Log the fetched address
+      if (address) {
+        document.getElementById('branchAddress').textContent = `Branch Address: ${address}`;
+      } else {
+        document.getElementById('branchAddress').textContent = 'No address found for the provided Branch No.';
+      }
+    } else if (response.status === 404) {
+      document.getElementById('branchAddress').textContent = 'No address found for the provided Branch No.';
+    } else {
+      document.getElementById('branchAddress').textContent = 'Error fetching address.';
+    }
+  } catch (err) {
+    console.error('Error fetching branch address:', err);
+    document.getElementById('branchAddress').textContent = 'Failed to fetch address.';
+  }
+}
+
+
+
+        // Fetch branches
+        async function fetchBranches() {
+            try {
+                const response = await fetch('/api/branches');
+                const branchTableBody = document.querySelector('#branchTable tbody');
+                branchTableBody.innerHTML = ''; // Clear table rows
+
+                if (response.ok) {
+                    const branches = await response.json();
+                    console.log('Fetched branches:', branches); // Debugging: Check the data structure
+                    branches.forEach(branch => {
+                        const row = `
+                            <tr>
+                                <td>${branch.branchno || ''}</td>
+                                <td>${branch.street || ''}</td>
+                                <td>${branch.city || ''}</td>
+                                <td>${branch.postcode || ''}</td>
+                                <td><button onclick="editBranch('${branch.branchno}', '${branch.street}', '${branch.city}', '${branch.postcode}')">Edit</button></td>
+                            </tr>
+                        `;
+                        branchTableBody.innerHTML += row;
+                    });
+                } else {
+                    alert('Failed to fetch branch data.');
+                }
+            } catch (err) {
+                console.error('Error fetching branches:', err);
+                alert('An error occurred while fetching branches.');
+            }
+        }
+
+        // Show edit form
+        function editBranch(branchno, street, city, postcode) {
+            document.getElementById('branchEditForm').classList.remove('hidden');
+            document.getElementById('editBranchNo').value = branchno;
+            document.getElementById('editStreet').value = street;
+            document.getElementById('editCity').value = city;
+            document.getElementById('editPostcode').value = postcode;
+        }
+
+        // Update branch
+        async function updateBranchAddress() {
+            const branchno = document.getElementById('editBranchNo').value;
+            const street = document.getElementById('editStreet').value;
+            const city = document.getElementById('editCity').value;
+            const postcode = document.getElementById('editPostcode').value;
+
+            try {
+                console.log(`Updating branch: ${branchno}`); // Debugging: Log branch details before update
+                const response = await fetch(`/api/branches/${branchno}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ street, city, postcode }),
+                });
+
+                if (response.ok) {
+                    alert('Branch updated successfully!');
+                    fetchBranches(); // Refresh table
+                    document.getElementById('branchEditForm').classList.add('hidden');
+                } else {
+                    alert('Failed to update branch.');
+                }
+            } catch (err) {
+                console.error('Error updating branch address:', err);
+                alert('An error occurred while updating the branch address.');
+            }
+        }
+
+        // Call fetchBranches on page load
+        fetchBranches();
+
+
+        // add new branch
+        async function openBranch() {
+    const p_branchno = document.getElementById('p_branchno').value.trim();
+    const p_street = document.getElementById('p_street').value.trim();
+    const p_city = document.getElementById('p_city').value.trim();
+    const p_postcode = document.getElementById('p_postcode').value.trim();
+
+    // Debugging: Log captured values
+    console.log('Branch No:', p_branchno);
+    console.log('Street:', p_street);
+    console.log('City:', p_city);
+    console.log('Postcode:', p_postcode);
+
+    // Check if any field is empty
+    if (!p_branchno || !p_street || !p_city || !p_postcode) {
+        console.log('Validation failed: One or more fields are empty.');
+        document.getElementById('openBranchMessage').textContent = 'All fields are required.';
+        return;
+    }
+
+    // Attempt to send data to the backend
+    try {
+        const response = await fetch('/api/open-branch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ p_branchno, p_street, p_city, p_postcode }),
+        });
+
+        const result = await response.text();
+        console.log('Server Response:', result);
+
+        if (response.ok) {
+            document.getElementById('openBranchMessage').textContent = 'Branch created successfully!';
+            document.getElementById('openBranchForm').reset(); // Reset form after success
+        } else {
+            document.getElementById('openBranchMessage').textContent = `Error: ${result}`;
+        }
+    } catch (err) {
+        console.error('Error creating branch:', err);
+        document.getElementById('openBranchMessage').textContent = 'An error occurred while creating the branch.';
+    }
+}
+
+
+
+
+
+
+    </script>
+
+</body>
+</html>
