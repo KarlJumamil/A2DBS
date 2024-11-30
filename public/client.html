@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dream Home Real Estate</title>
+    <title>Dream Home Real Estate - Client Management</title>
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
@@ -11,5 +11,165 @@
 <div class="tab-container">
     <a href="staff.html" class="tab">Staff Main Menu</a>
     <a href="branch.html" class="tab">Branch Main Menu</a>
-    <a href="client.html" class="tab">Client Main Menu</a>
+    <div class="tab active" onclick="openTab('client')">Client Main Menu</div>
 </div>
+
+<!-- Client Tab Content -->
+<div id="client" class="tab-content active">
+    <h1>Client Management</h1>
+
+    <!-- Add Client Form -->
+    <h2>Add New Client</h2>
+    <form id="clientForm" action="/api/add-client" method="POST">
+        <label for="clientNo">Client No:</label>
+        <input type="text" id="clientNo" name="clientNo" required><br>
+
+        <label for="fName">First Name:</label>
+        <input type="text" id="fName" name="fName" required><br>
+
+        <label for="lName">Last Name:</label>
+        <input type="text" id="lName" name="lName" required><br>
+
+        <label for="telNo">Telephone:</label>
+        <input type="text" id="telNo" name="telNo" required><br>
+
+        <label for="street">Street:</label>
+        <input type="text" id="street" name="street" required><br>
+
+        <label for="city">City:</label>
+        <input type="text" id="city" name="city" required><br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br>
+
+        <label for="prefType">Preferred Type:</label>
+        <select id="prefType" name="prefType" required>
+            <option value="House">House</option>
+            <option value="Flat">Flat</option>
+        </select><br>
+
+        <label for="maxRent">Max Rent:</label>
+        <input type="number" id="maxRent" name="maxRent" required><br>
+
+        <button type="submit">Add Client</button>
+    </form>
+
+    <hr>
+
+    <!-- Client List and Update -->
+    <h2>Client List and Update</h2>
+    <button onclick="fetchClients()">Refresh Client List</button>
+    <table border="1" id="clientTable">
+        <thead>
+            <tr>
+                <th>Client No</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Telephone</th>
+                <th>Street</th>
+                <th>City</th>
+                <th>Email</th>
+                <th>Preferred Type</th>
+                <th>Max Rent</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Client records will be dynamically added here -->
+        </tbody>
+    </table>
+
+    <div id="updateForm" class="hidden">
+        <h2>Update Client Details</h2>
+        <form id="clientUpdateForm">
+            <input type="hidden" id="updateClientNo">
+            <label for="updateTelNo">Telephone:</label>
+            <input type="text" id="updateTelNo"><br>
+
+            <label for="updateEmail">Email:</label>
+            <input type="email" id="updateEmail"><br>
+
+            <label for="updateMaxRent">Max Rent:</label>
+            <input type="number" id="updateMaxRent"><br>
+
+            <button type="button" onclick="updateClient()">Update</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Function to switch between tabs
+    function openTab(tabName) {
+        const contents = document.querySelectorAll('.tab-content');
+        contents.forEach(content => content.classList.remove('active'));
+
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => tab.classList.remove('active'));
+
+        document.getElementById(tabName).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    // Fetch all client records and populate the table
+    async function fetchClients() {
+        const response = await fetch('/api/clients');
+        const clientTableBody = document.querySelector('#clientTable tbody');
+        clientTableBody.innerHTML = ''; // Clear existing rows
+
+        if (response.ok) {
+            const clientList = await response.json();
+            clientList.forEach(client => {
+                const row = `
+                    <tr>
+                        <td>${client.clientNo || ''}</td>
+                        <td>${client.fName || ''}</td>
+                        <td>${client.lName || ''}</td>
+                        <td>${client.telNo || ''}</td>
+                        <td>${client.street || ''}</td>
+                        <td>${client.city || ''}</td>
+                        <td>${client.email || ''}</td>
+                        <td>${client.prefType || ''}</td>
+                        <td>${client.maxRent || ''}</td>
+                        <td><button onclick="showUpdateForm('${client.clientNo}', '${client.telNo}', '${client.email}', ${client.maxRent})">Edit</button></td>
+                    </tr>
+                `;
+                clientTableBody.innerHTML += row;
+            });
+        } else {
+            alert('Failed to fetch client records.');
+        }
+    }
+
+    // Show update form pre-filled with client data
+    function showUpdateForm(clientNo, telNo, email, maxRent) {
+        document.getElementById('updateForm').classList.remove('hidden');
+        document.getElementById('updateClientNo').value = clientNo;
+        document.getElementById('updateTelNo').value = telNo;
+        document.getElementById('updateEmail').value = email;
+        document.getElementById('updateMaxRent').value = maxRent;
+    }
+
+    // Update client details
+    async function updateClient() {
+        const clientNo = document.getElementById('updateClientNo').value;
+        const telNo = document.getElementById('updateTelNo').value;
+        const email = document.getElementById('updateEmail').value;
+        const maxRent = document.getElementById('updateMaxRent').value;
+
+        const response = await fetch(`/api/client/${clientNo}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ telNo, email, maxRent })
+        });
+
+        if (response.ok) {
+            alert('Client updated successfully!');
+            fetchClients(); // Refresh the client list
+            document.getElementById('updateForm').classList.add('hidden');
+        } else {
+            alert('Failed to update client.');
+        }
+    }
+</script>
+</body>
+</html>

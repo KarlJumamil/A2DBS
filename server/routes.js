@@ -3,7 +3,7 @@ const path = require('path');
 const router = express.Router();
 const { executeQuery } = require('./database');
 
-// Serve index.html
+// Serve staff.html
 router.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/staff.html'));
 });
@@ -245,7 +245,122 @@ router.post('/api/open-branch', async (req, res) => {
 
 
 
+//
+//
+//
+//
+//
+// Clients below
+//
+//
+//
+//
+// Handle client addition
+router.post('/api/add-client', async (req, res) => {
+  const { clientNo, fName, lName, telNo, street, city, email, prefType, maxRent } = req.body;
 
+  // Validate required fields
+  if (!clientNo || !fName || !lName || !telNo || !street || !city || !email || !prefType || !maxRent) {
+    return res.status(400).send('All fields are required.');
+  }
+
+  const query = `
+    INSERT INTO DH_CLIENT (CLIENTNO, FNAME, LNAME, TELNO, STREET, CITY, EMAIL, PREFTYPE, MAXRENT)
+    VALUES (:clientNo, :fName, :lName, :telNo, :street, :city, :email, :prefType, :maxRent)
+  `;
+
+  try {
+    await executeQuery(query, { clientNo, fName, lName, telNo, street, city, email, prefType, maxRent });
+    res.status(200).send('Client added successfully!');
+  } catch (err) {
+    console.error('Error inserting client:', err);
+    res.status(500).send('An error occurred while adding the client.');
+  }
+});
+
+// Fetch all client records
+router.get('/api/clients', async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        CLIENTNO AS clientNo,
+        FNAME AS fName,
+        LNAME AS lName,
+        TELNO AS telNo,
+        STREET AS street,
+        CITY AS city,
+        EMAIL AS email,
+        PREFTYPE AS prefType,
+        MAXRENT AS maxRent
+      FROM DH_CLIENT
+    `;
+    const result = await executeQuery(query);
+
+    // Transform rows to array of objects if necessary
+    const formattedRows = result.rows.map(row => ({
+      clientNo: row[0],
+      fName: row[1],
+      lName: row[2],
+      telNo: row[3],
+      street: row[4],
+      city: row[5],
+      email: row[6],
+      prefType: row[7],
+      maxRent: row[8],
+    }));
+
+    res.status(200).json(formattedRows);
+  } catch (err) {
+    console.error('Error fetching client records:', err);
+    res.status(500).send('An error occurred while fetching client records.');
+  }
+});
+
+// Update specific client details
+router.put('/api/client/:clientNo', async (req, res) => {
+  const { clientNo } = req.params;
+  const { telNo, email, maxRent } = req.body;
+
+  // Validate input
+  if (!telNo && !email && !maxRent) {
+    return res.status(400).send('At least one field (telNo, email, maxRent) must be provided for update.');
+  }
+
+  let updateFields = [];
+  let updateParams = {};
+
+  if (telNo) {
+    updateFields.push('TELNO = :telNo');
+    updateParams.telNo = telNo;
+  }
+  if (email) {
+    updateFields.push('EMAIL = :email');
+    updateParams.email = email;
+  }
+  if (maxRent) {
+    updateFields.push('MAXRENT = :maxRent');
+    updateParams.maxRent = maxRent;
+  }
+
+  updateParams.clientNo = clientNo;
+
+  const query = `
+    UPDATE DH_CLIENT
+    SET ${updateFields.join(', ')}
+    WHERE CLIENTNO = :clientNo
+  `;
+
+  try {
+    const result = await executeQuery(query, updateParams);
+    if (result.rowsAffected === 0) {
+      return res.status(404).send('Client record not found.');
+    }
+    res.status(200).send('Client record updated successfully.');
+  } catch (err) {
+    console.error('Error updating client record:', err);
+    res.status(500).send('An error occurred while updating client record.');
+  }
+});
 
 
 module.exports = router;
