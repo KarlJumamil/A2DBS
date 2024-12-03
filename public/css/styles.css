@@ -1,4 +1,5 @@
 /* Basic styles for tabs */
+
 .tab-container {
     display: flex;
     border-bottom: 2px solid #ccc;
@@ -16,6 +17,7 @@
 .tab.active {
     background-color: #ddd;
     font-weight: bold;
+    color: black;
 }
 
 .tab-content {
@@ -32,6 +34,7 @@
     display: none;
 }
 /* Apply tab styles to links */
+
 .tab-container a.tab {
     text-decoration: none;
     color: inherit;
@@ -48,3 +51,5 @@
     background-color: #ddd;
     font-weight: bold;
 }
+
+
